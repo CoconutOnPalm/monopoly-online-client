@@ -111,6 +111,26 @@
   color: var(--text);
 }
 
+/* Game notification (info messages) */
+.game-notification {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  z-index: 1000;
+  animation: slideDownFade 3s ease-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.game-notification.info {
+  background: var(--info);
+  color: var(--text);
+}
+
 @keyframes slideDownFade {
   0% {
     opacity: 0;
@@ -408,6 +428,7 @@
 	justify-content: center;
 	padding: 0.5rem;
 	gap: 0.25rem;
+	position: relative;
 }
 
 .tile-name {
@@ -417,6 +438,48 @@
 	color: var(--text);
 	line-height: 1.2;
 	word-break: break-word;
+}
+
+/* Pawns on tiles */
+.tile-pawns {
+	position: absolute;
+	bottom: 2px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	gap: 2px;
+	flex-wrap: wrap;
+	justify-content: center;
+	max-width: 90%;
+	pointer-events: none;
+}
+
+.tile-pawn {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 2px solid var(--bg-dark);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+	transition: transform 0.3s ease;
+}
+
+/* Animate pawn appearance */
+@keyframes pawnAppear {
+	0% {
+		transform: scale(0);
+		opacity: 0;
+	}
+	50% {
+		transform: scale(1.2);
+	}
+	100% {
+		transform: scale(1);
+		opacity: 1;
+	}
+}
+
+.tile-pawn {
+	animation: pawnAppear 0.4s ease-out;
 }
 
 .tile-type {
@@ -562,5 +625,12 @@
 	.balance-notification {
 		font-size: 1rem;
 		padding: 0.5rem 1rem;
+	}
+
+	/* Smaller pawns on mobile */
+	.tile-pawn {
+		width: 10px;
+		height: 10px;
+		border-width: 1px;
 	}
 }

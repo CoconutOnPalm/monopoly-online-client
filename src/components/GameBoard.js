@@ -1,11 +1,29 @@
 import React from 'react';
 import './GameBoard.css';
 
+
+function arrayToRGB(arr) {
+    // console.log("arrayToRGB func:")
+    // console.log(arr, " length=", arr.length)
+    // if (arr.length != 3)
+    //     return "(0, 0, 0)"
+
+    // console.log(`rgb=rgb(${arr[0]}, ${arr[1]}, ${arr[2]})`);
+    // return `(${arr[0]}, ${arr[1]}, ${arr[2]})`
+
+    arr = toString(arr)
+    arr.replace("[", "(")
+    arr.replace("]", ")")
+    console.log(arr)
+    return arr
+}
+
+
 /**
  * GameBoard Component
  * Displays the Monopoly game board in a square layout
  */
-const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification }) => {
+const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions }) => {
 	if (!board || board.length === 0) {
 		return (
 			<div className="game-board-container">
@@ -15,11 +33,28 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 	}
 
 	/**
+	 * Get pawn color RGB string for a player
+	 */
+	const getPawnColor = (pawnName) => {
+		let color =  pawnName ? pawns.filter(pawn => { return pawn.name === pawnName })[0].rgb : '#999';
+        console.log("[DEBUG]: ", color)
+        return "rgb" + color
+	};
+
+	/**
+	 * Get players at a specific tile position
+	 */
+	const getPlayersAtPosition = (tileId) => {
+		if (!playerPositions || !players) return [];
+		return players.filter(player => playerPositions[player.username] === tileId);
+	};
+
+	/**
 	 * Get level display for property using unicode symbols
 	 * 🏠 = house, 🏨 = hotel
 	 */
 	const getLevelDisplay = (level) => {
-		if (level === 0) return 'Undeveloped';
+		if (level === 0) return '';
 		if (level >= 1 && level <= 4) return '🏠'.repeat(level);
 		if (level === 5) return '🏨';
 		return '';
@@ -50,6 +85,7 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 	const renderTile = (tile, position) => {
 		const isProperty = tile.type === 'property';
 		const propertyColor = isProperty ? getPropertyColor(tile.color) : null;
+		const playersOnTile = getPlayersAtPosition(tile.id);
 
 		return (
 			<div key={tile.id} className={`tile tile-${position}`} data-tile-id={tile.id}>
@@ -68,6 +104,23 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 						<span className="tile-price">${tile['owner-costs'][0]}</span>
 					)}
 				</div>
+				
+				{/* Render pawns on this tile */}
+				{playersOnTile.length > 0 && (
+					<div className="tile-pawns">
+						{playersOnTile.map((player, idx) => (
+							<div
+								key={player.username}
+								className="tile-pawn"
+								style={{
+									backgroundColor: getPawnColor(player.pawn),
+									zIndex: idx + 1
+								}}
+								title={player.username}
+							/>
+						))}
+					</div>
+				)}
 			</div>
 		);
 	};
@@ -88,12 +141,19 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 	const topTiles = sortedBoard.slice(20, 31);      // 20-30
 	const rightTiles = sortedBoard.slice(31, 40);    // 31-39
 
-	return (
+		return (
 		<div className="game-board-container">
 			{/* Balance notification */}
 			{balanceNotification !== null && (
 				<div className={`balance-notification ${balanceNotification > 0 ? 'positive' : 'negative'}`}>
 					{balanceNotification > 0 ? '+' : ''}{balanceNotification}$
+				</div>
+			)}
+			
+			{/* Game notification */}
+			{gameNotification && (
+				<div className={`game-notification ${gameNotification.type}`}>
+					{gameNotification.message}
 				</div>
 			)}
 
@@ -197,7 +257,7 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 							<span
 								className="player-pawn"
 								style={{
-									backgroundColor: player.pawn ? `rgb(${player.pawn})` : '#999'
+									backgroundColor: player.pawn ? getPawnColor(player.pawn) : '#999'
 								}}
 							/>
 							<span className="player-name">{player.username}</span>

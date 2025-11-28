@@ -29,6 +29,9 @@ function App() {
 		ownedProperties: []
 	});
 	const [balanceNotification, setBalanceNotification] = useState(null);
+	const [gameNotification, setGameNotification] = useState(null);
+	// Track player positions on board (username -> position)
+	const [playerPositions, setPlayerPositions] = useState({});
 
 	// Store username globally for button access
 	useEffect(() => {
@@ -84,8 +87,14 @@ function App() {
 			currentTurn: null,
 			lobbyCode: data['lobby-code']
 		});
+		
+		// Initialize host at position 0
+		if (username) {
+			setPlayerPositions({ [username]: 0 });
+		}
+		
 		setCurrentScene('game');
-	}, []);
+	}, [username]);
 
 	/**
 	 * Handle successful game join
@@ -98,6 +107,14 @@ function App() {
 			pawns: data.pawns || [],
 			currentTurn: null
 		});
+		
+		// Initialize all existing players at position 0
+		const positions = {};
+		(data.players || []).forEach(player => {
+			positions[player.username] = 0;
+		});
+		setPlayerPositions(positions);
+		
 		setCurrentScene('game');
 	}, []);
 
@@ -106,9 +123,16 @@ function App() {
 	 */
 	const handleNewPlayer = useCallback((data) => {
 		console.log('New player joined:', data);
+		const player = data.player;
 		setGameData(prev => ({
 			...prev,
-			players: [...prev.players, data.player]
+			players: [...prev.players, player]
+		}));
+		
+		// Initialize new player at position 0
+		setPlayerPositions(prev => ({
+			...prev,
+			[player.username]: 0
 		}));
 	}, []);
 
@@ -117,7 +141,20 @@ function App() {
 	 */
 	const handleGameStart = useCallback((data) => {
 		console.log('Game started:', data);
-		// Game start notification - could show a message
+		
+		// Show game started notification
+		setGameNotification({ type: 'info', message: 'Game Started!' });
+		setTimeout(() => setGameNotification(null), 3000);
+		
+		// Initialize all players at position 0 (start)
+		setGameData(prev => {
+			const positions = {};
+			prev.players.forEach(player => {
+				positions[player.username] = 0;
+			});
+			setPlayerPositions(positions);
+			return prev;
+		});
 	}, []);
 
 	/**
@@ -129,7 +166,13 @@ function App() {
 			...prev,
 			currentTurn: data.player
 		}));
-	}, []);
+		
+		// Show notification if it's this player's turn
+		if (data.player === username) {
+			setGameNotification({ type: 'info', message: 'Your Turn!' });
+			setTimeout(() => setGameNotification(null), 3000);
+		}
+	}, [username]);
 
 	/**
 	 * Handle player data sync
@@ -185,8 +228,23 @@ function App() {
 	 */
 	const handleSetPosition = useCallback((data) => {
 		console.log('Position set:', data);
-		// Could update player position on board
-	}, []);
+		const positionData = data.data || data;
+		
+		// New format: { player: "username", position: 5 }
+		// Old format: just the position number
+		if (typeof positionData === 'object' && positionData.player) {
+			setPlayerPositions(prev => ({
+				...prev,
+				[positionData.player]: positionData.position
+			}));
+		} else if (typeof positionData === 'number' && username) {
+			// Fallback for old format
+			setPlayerPositions(prev => ({
+				...prev,
+				[username]: positionData
+			}));
+		}
+	}, [username]);
 
 	/**
 	 * Setup WebSocket message handlers
@@ -230,6 +288,9 @@ function App() {
 			if (!wsService.isConnected) {
 				await wsService.connect();
 			}
+			
+			// Expose wsService globally for button access
+			window.wsService = wsService;
 
 			// If no lobby code provided, create a new game
 			if (!lobbyCode) {
@@ -305,6 +366,8 @@ function App() {
 					currentTurn={gameData.currentTurn}
 					playerData={playerData}
 					balanceNotification={balanceNotification}
+					gameNotification={gameNotification}
+					playerPositions={playerPositions}
 				/>
 			)}
 
