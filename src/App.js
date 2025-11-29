@@ -32,6 +32,7 @@ function App() {
 	const [gameNotification, setGameNotification] = useState(null);
 	// Track player positions on board (username -> position)
 	const [playerPositions, setPlayerPositions] = useState({});
+	const [isHost, setIsHost] = useState(false);
 
 	// Store username globally for button access
 	useEffect(() => {
@@ -88,6 +89,9 @@ function App() {
 			lobbyCode: data['lobby-code']
 		});
 		
+		// Mark as host
+		setIsHost(true);
+		
 		// Initialize host at position 0
 		if (username) {
 			setPlayerPositions({ [username]: 0 });
@@ -107,6 +111,9 @@ function App() {
 			pawns: data.pawns || [],
 			currentTurn: null
 		});
+		
+		// Not the host when joining
+		setIsHost(false);
 		
 		// Initialize all existing players at position 0
 		const positions = {};
@@ -368,6 +375,7 @@ function App() {
 					balanceNotification={balanceNotification}
 					gameNotification={gameNotification}
 					playerPositions={playerPositions}
+					isHost={isHost}
 				/>
 			)}
 

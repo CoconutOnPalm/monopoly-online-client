@@ -23,7 +23,7 @@ function arrayToRGB(arr) {
  * GameBoard Component
  * Displays the Monopoly game board in a square layout
  */
-const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions }) => {
+const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions, isHost }) => {
 	if (!board || board.length === 0) {
 		return (
 			<div className="game-board-container">
@@ -250,6 +250,17 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 		{/* Right Panel - Players List */}
 		<div className="side-panel right-panel">
 			<h3>Players</h3>
+			
+			{/* Start Game button for host */}
+			{isHost && !currentTurn && (
+				<button 
+					className="start-game-btn"
+					onClick={() => window.wsService?.startGame()}
+				>
+					🎮 Start Game
+				</button>
+			)}
+			
 			<div className="players-list">
 				{players && players.length > 0 ? (
 					players.map((player, idx) => (
