@@ -14,7 +14,7 @@ A modern React-based client for playing Monopoly online with friends.
 ## Project Structure
 
 ```
-client/
+monopoly-online-client/
 ├── public/
 │   └── index.html              # HTML entry point
 ├── src/
@@ -48,7 +48,7 @@ client/
 
 1. Navigate to the client directory:
 ```bash
-cd client
+cd monopoly-online-client
 ```
 
 2. Install dependencies:

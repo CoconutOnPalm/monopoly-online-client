@@ -39,7 +39,8 @@ module.exports = {
 			directory: path.join(__dirname, 'public')
 		},
 		compress: true,
-		port: 3000,
+		// Allow overriding the port via the PORT environment variable
+		port: process.env.PORT || 3000,
 		hot: true
 	}
 };

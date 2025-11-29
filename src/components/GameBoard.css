@@ -111,6 +111,14 @@
   transform: translateY(0);
 }
 
+/* Lobby code label shown to players */
+.lobby-code-label {
+	text-align: center;
+	font-size: 0.95rem;
+	color: var(--text-muted);
+	margin-bottom: 0.75rem;
+}
+
 /* Balance notification */
 .balance-notification {
   position: fixed;

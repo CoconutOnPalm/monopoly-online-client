@@ -1,0 +1,44 @@
+.tile-message-overlay {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 20px;
+  z-index: 1500;
+}
+
+.tile-message {
+  background: var(--bg-dark);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  min-width: 260px;
+  max-width: 640px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.tile-message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.tile-message-title {
+  margin: 0;
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.tile-message-close {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.tile-message-body {
+  color: var(--text);
+  font-size: 0.95rem;
+}

@@ -31,7 +31,32 @@ class WebSocketService {
 				};
 
 				this.ws.onmessage = (event) => {
-					this.handleMessage(event.data);
+					// Support text and Blob payloads; ensure UTF-8 decoding for binary blobs
+					if (typeof event.data === 'string') {
+						this.handleMessage(event.data);
+					} else if (event.data instanceof Blob) {
+						// Read blob as UTF-8 text
+						event.data.text().then(text => {
+							this.handleMessage(text);
+						}).catch(err => {
+							console.error('Error reading message blob as text:', err);
+						});
+					} else if (event.data instanceof ArrayBuffer) {
+						try {
+							const decoder = new TextDecoder('utf-8');
+							const text = decoder.decode(new Uint8Array(event.data));
+							this.handleMessage(text);
+						} catch (err) {
+							console.error('Error decoding ArrayBuffer message:', err);
+						}
+					} else {
+						// Fallback: attempt to stringify
+						try {
+							this.handleMessage(String(event.data));
+						} catch (err) {
+							console.error('Unknown message data type:', err);
+						}
+					}
 				};
 
 				this.ws.onerror = (error) => {

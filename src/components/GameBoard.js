@@ -23,7 +23,7 @@ function arrayToRGB(arr) {
  * GameBoard Component
  * Displays the Monopoly game board in a square layout
  */
-const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions, isHost }) => {
+const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions, isHost, lobbyCode }) => {
 	if (!board || board.length === 0) {
 		return (
 			<div className="game-board-container">
@@ -260,8 +260,17 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 					🎮 Start Game
 				</button>
 			)}
+
+			{/* Lobby code label for host (below Start button) */}
+			{isHost && lobbyCode && (
+				<div className="lobby-code-label">Lobby Code: <strong>{lobbyCode}</strong></div>
+			)}
 			
 			<div className="players-list">
+				{/* For non-hosts, show lobby code above players list */}
+				{!isHost && lobbyCode && (
+					<div className="lobby-code-label">Lobby Code: <strong>{lobbyCode}</strong></div>
+				)}
 				{players && players.length > 0 ? (
 					players.map((player, idx) => (
 						<div key={idx} className="player-item">
