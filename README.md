@@ -108,7 +108,7 @@ The application supports both dark and light themes. Click the theme toggle butt
 
 ## WebSocket Protocol
 
-The client implements the communication protocol defined in `shared/comm-protocol.md`. All messages follow this structure:
+The client implements the communication protocol defined in `monopoly-online-shared/comm-protocol.md`. All messages follow this structure:
 
 ```json
 {
