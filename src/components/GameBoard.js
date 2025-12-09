@@ -23,7 +23,7 @@ function arrayToRGB(arr) {
  * GameBoard Component
  * Displays the Monopoly game board in a square layout
  */
-const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions, isHost, lobbyCode }) => {
+const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNotification, gameNotification, playerPositions, isHost, lobbyCode, onPropertyClick }) => {
 	if (!board || board.length === 0) {
 		return (
 			<div className="game-board-container">
@@ -192,7 +192,12 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 									<h4>Your Properties</h4>
 									<div className="properties-list">
 										{playerData.ownedProperties.map((property, idx) => (
-											<div key={idx} className="property-card">
+											<div 
+												key={idx} 
+												className="property-card clickable"
+												onClick={() => onPropertyClick && onPropertyClick(property)}
+												title="Click to view details and upgrade"
+											>
 												<div 
 													className="property-card-color" 
 													style={{ backgroundColor: getPropertyColor(property.color) }}
@@ -251,13 +256,25 @@ const GameBoard = ({ board, players, pawns, currentTurn, playerData, balanceNoti
 		<div className="side-panel right-panel">
 			<h3>Players</h3>
 			
-			{/* Start Game button for host */}
+			{/* Start Game / End Game button for host */}
 			{isHost && !currentTurn && (
 				<button 
 					className="start-game-btn"
 					onClick={() => window.wsService?.startGame()}
 				>
 					🎮 Start Game
+				</button>
+			)}
+			{isHost && currentTurn && (
+				<button 
+					className="end-game-btn"
+					onClick={() => {
+						if (window.confirm('Are you sure you want to end the game?')) {
+							window.wsService?.endGame();
+						}
+					}}
+				>
+					🛑 End Game
 				</button>
 			)}
 

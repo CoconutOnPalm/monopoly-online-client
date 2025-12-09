@@ -216,6 +216,25 @@ class WebSocketService {
 	}
 
 	/**
+	 * Send REQUEST_UPGRADE message
+	 * @param {number} propertyId - Property ID to upgrade
+	 */
+	requestUpgrade(propertyId) {
+		return this.send('REQUEST_UPGRADE', {
+			property: {
+				id: propertyId
+			}
+		});
+	}
+
+	/**
+	 * Send GAME_END message
+	 */
+	endGame() {
+		return this.send('GAME_END', {});
+	}
+
+	/**
 	 * Disconnect from server
 	 */
 	disconnect() {

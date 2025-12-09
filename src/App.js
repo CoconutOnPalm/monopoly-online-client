@@ -32,6 +32,7 @@ function App() {
     const [gameNotification, setGameNotification] = useState(null);
     const [choicePrompt, setChoicePrompt] = useState(null);
     const [tileMessage, setTileMessage] = useState(null);
+    const [propertyDetailsModal, setPropertyDetailsModal] = useState(null);
     // Track player positions on board (username -> position)
     const [playerPositions, setPlayerPositions] = useState({});
     const [isHost, setIsHost] = useState(false);
@@ -280,6 +281,54 @@ function App() {
     }, [username]);
 
     /**
+     * Handle property upgrade response from server
+     */
+    const handlePropertyUpgrade = useCallback((data) => {
+        console.log('Property upgrade:', data);
+        const upgradeData = data.property || data;
+
+        setPlayerData(prev => {
+            const updatedProperties = prev.ownedProperties.map(prop => {
+                if (prop.id === upgradeData.id) {
+                    return { ...prop, level: upgradeData.level };
+                }
+                return prop;
+            });
+            return { ...prev, ownedProperties: updatedProperties };
+        });
+
+        // Show success notification
+        setGameNotification({ type: 'success', message: 'Property upgraded!' });
+        setTimeout(() => setGameNotification(null), 2000);
+    }, []);
+
+    /**
+     * Handle game end
+     */
+    const handleGameEnd = useCallback((data) => {
+        console.log('Game ended:', data);
+        const reason = data.reason || 'Game has ended';
+        
+        // Show game ended notification
+        alert(`Game Ended\n\n${reason}`);
+        
+        // Return to login screen
+        setCurrentScene('login');
+        setGameData({
+            board: [],
+            players: [],
+            pawns: [],
+            currentTurn: null
+        });
+        setPlayerData({
+            balance: 0,
+            ownedProperties: []
+        });
+        setPlayerPositions({});
+        setIsHost(false);
+    }, []);
+
+    /**
      * Setup WebSocket message handlers
      */
     useEffect(() => {
@@ -296,6 +345,8 @@ function App() {
         wsService.on('TRANSACTION', handleTransaction);
         wsService.on('PROPERTY_TRANSFER', handlePropertyTransfer);
         wsService.on('SET_POSITION', handleSetPosition);
+        wsService.on('PROPERTY_UPGRADE', handlePropertyUpgrade);
+        wsService.on('GAME_END', handleGameEnd);
 
         // Cleanup on unmount
         return () => {
@@ -311,8 +362,10 @@ function App() {
             wsService.off('TRANSACTION');
             wsService.off('PROPERTY_TRANSFER');
             wsService.off('SET_POSITION');
+            wsService.off('PROPERTY_UPGRADE');
+            wsService.off('GAME_END');
         };
-    }, [handleError, handleNewGame, handleJoinGame, handleNewPlayer, handleGameStart, handleNextTurn, handlePlayerData, handleTransaction, handlePropertyTransfer, handleSetPosition]);
+    }, [handleError, handleNewGame, handleJoinGame, handleNewPlayer, handleGameStart, handleNextTurn, handlePlayerData, handleTransaction, handlePropertyTransfer, handleSetPosition, handlePropertyUpgrade, handleGameEnd]);
 
     /**
      * Handle join button click from LoginScreen
@@ -409,6 +462,7 @@ function App() {
                     playerPositions={playerPositions}
                     isHost={isHost}
                     lobbyCode={gameData.lobbyCode}
+                    onPropertyClick={(property) => setPropertyDetailsModal(property)}
                 />
             )}
 
@@ -449,6 +503,26 @@ function App() {
                 })()
 			    )
             }
+
+            {/* Property details modal */}
+            {propertyDetailsModal && (
+                (() => {
+                    const PropertyDetailsModal = require('./components/PropertyDetailsModal').default;
+                    return (
+                        <PropertyDetailsModal
+                            visible={true}
+                            property={propertyDetailsModal}
+                            board={gameData.board}
+                            playerBalance={playerData.balance}
+                            onUpgrade={(propertyId) => {
+                                wsService.requestUpgrade(propertyId);
+                                setPropertyDetailsModal(null);
+                            }}
+                            onClose={() => setPropertyDetailsModal(null)}
+                        />
+                    );
+                })()
+            )}
 
             {/* Error popup (non-blocking) */}
             <ErrorPopup
